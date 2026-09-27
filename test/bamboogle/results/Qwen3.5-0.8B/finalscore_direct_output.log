@@ -1,0 +1,18 @@
+##################################################
+Task: bamboogle
+📊 Using SINGLE-STAGE scoring for BAMBOOGLE
+Arguments: Namespace(task_name='bamboogle', data_file='bamboogle/data/data.json', result_dir='bamboogle/results/Qwen3.5-0.8B', exp_name=None, output_file='finalresults_direct_output.json', log_dir=None, response_type='direct_output', max_workers=16)
+# task_name: bamboogle
+# data_file: bamboogle/data/data.json
+# result_dir: bamboogle/results/Qwen3.5-0.8B
+# exp_name: None
+# output_file: finalresults_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 16
+##################################################
+
+Local OpenAI engine gpt-4o initialized.
+
+Rate limit error encountered: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organization org-KvmXkX4Zw8ztK8D9LnUoufDQ on tokens per min (TPM): Limit 30000, Used 30000, Requested 472. Please try again in 943ms. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}
+Rate limit error encountered: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organization org-KvmXkX4Zw8ztK8D9LnUoufDQ on tokens per min (TPM): Limit 30000, Used 30000, Requested 518. Please try again in 1.036s. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}

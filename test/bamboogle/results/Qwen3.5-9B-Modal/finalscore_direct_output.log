@@ -1,0 +1,35 @@
+##################################################
+Task: bamboogle
+📊 Using SINGLE-STAGE scoring for BAMBOOGLE
+Arguments: Namespace(task_name='bamboogle', data_file='bamboogle/data/data.json', result_dir='bamboogle/results/Qwen3.5-9B-Modal', exp_name=None, output_file='finalresults_direct_output.json', log_dir=None, response_type='direct_output', max_workers=16)
+# task_name: bamboogle
+# data_file: bamboogle/data/data.json
+# result_dir: bamboogle/results/Qwen3.5-9B-Modal
+# exp_name: None
+# output_file: finalresults_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 16
+##################################################
+
+Local OpenAI engine gpt-4o initialized.
+
+
+Accuracy: 70.34% (83/118)
+
+Results saved to bamboogle/results/Qwen3.5-9B-Modal/finalresults_direct_output.json
+Wrong PIDs: ['4', '7', '13', '23', '34', '38', '42', '44', '45', '47', '49', '52', '54', '55', '56', '57', '58', '59', '60', '62', '63', '65', '66', '73', '78', '79', '82', '84', '87', '94', '96', '104', '107', '116', '121']
+Wrong Indices: [4, 7, 13, 23, 34, 38, 42, 44, 45, 47, 49, 52, 54, 55, 56, 57, 58, 59, 60, 62, 63, 65, 66, 73, 78, 79, 82, 84, 87, 94, 96, 104, 107, 116, 121]
+Log dir: bamboogle/logs/Qwen3.5-9B-Modal
+
+Step stats:
+- average_time: 	105.1
+- average_step: 	2.08
+- one_step_rate: 	0.3
+
+Tool usage:
+- Wikipedia_RAG_Search_Tool: 	0.48
+- Web_RAG_Search_Tool: 	0.301
+- Ground_Google_Search_Tool: 	0.203
+- Generalist_Solution_Generator_Tool: 	0.016
+Scores saved to bamboogle/results/Qwen3.5-9B-Modal/final_scores_direct_output.json

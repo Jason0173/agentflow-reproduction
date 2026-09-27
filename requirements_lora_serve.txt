@@ -1,0 +1,25 @@
+# Pinned only where the error-report log told us instability lives.
+# Everything else intentionally uses floors, not locks, so the cluster's
+# CUDA-matched wheel cache can pick compatible builds.
+
+# Core serving
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.7
+requests>=2.31
+
+# Qwen3.5 + LoRA
+# transformers 4.47+ is the first release with Qwen3.5 chat-model support
+# (Qwen3_5ForCausalLM), which is the exact gap the teammate's report hit.
+transformers>=4.47
+peft>=0.18.1
+accelerate>=0.33
+safetensors>=0.4
+sentencepiece>=0.2
+tokenizers>=0.20
+
+# Torch: install the CUDA 12.x build matching your H200 node's driver BEFORE
+# these extras, e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+# This file purposely does NOT pin torch to avoid re-triggering the CUDA/nightly
+# version war described in the deployment report (section "嘗試 3").

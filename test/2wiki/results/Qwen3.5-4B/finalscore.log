@@ -1,0 +1,24 @@
+##################################################
+Task: 2wiki
+📊 Using SINGLE-STAGE scoring for 2WIKI
+Arguments: Namespace(task_name='2wiki', data_file='2wiki/data/data.json', result_dir='2wiki/results/Qwen3.5-4B', exp_name=None, output_file='final_scores_direct_output.json', log_dir=None, response_type='direct_output', max_workers=16)
+# task_name: 2wiki
+# data_file: 2wiki/data/data.json
+# result_dir: 2wiki/results/Qwen3.5-4B
+# exp_name: None
+# output_file: final_scores_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 16
+##################################################
+
+Local OpenAI engine gpt-4o initialized.
+
+Scoring results (single-stage):   0%|          | 0/100 [00:00<?, ?it/s]Scoring results (single-stage): 100%|██████████| 100/100 [00:00<00:00, 1924.93it/s]
+
+Accuracy: 42.0% (42/100)
+
+Results saved to 2wiki/results/Qwen3.5-4B/final_scores_direct_output.json
+Wrong PIDs: ['1', '2', '5', '6', '7', '10', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '27', '31', '32', '34', '35', '36', '38', '40', '41', '42', '43', '44', '46', '47', '49', '51', '52', '53', '56', '58', '59', '61', '62', '65', '69', '70', '71', '72', '77', '78', '80', '81', '82', '83', '84', '86', '88', '90', '91', '93', '94', '98']
+Wrong Indices: [1, 2, 5, 6, 7, 10, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 27, 31, 32, 34, 35, 36, 38, 40, 41, 42, 43, 44, 46, 47, 49, 51, 52, 53, 56, 58, 59, 61, 62, 65, 69, 70, 71, 72, 77, 78, 80, 81, 82, 83, 84, 86, 88, 90, 91, 93, 94, 98]
+Scores saved to 2wiki/results/Qwen3.5-4B/final_scores_direct_output.json

@@ -1,0 +1,25 @@
+{
+  "benchmark": "Spider Text-to-SQL",
+  "results": [
+    {
+      "model": "Qwen2.5-7B-Instruct",
+      "training": "none",
+      "method": "full AgentFlow loop",
+      "execution_accuracy": 0.35,
+      "correct": 7,
+      "total": 20
+    },
+    {
+      "model": "Qwen3.5-0.8B",
+      "training": "none",
+      "method": "full AgentFlow loop",
+      "execution_accuracy": 0.5,
+      "correct": 10,
+      "total": 20
+    }
+  ],
+  "eval_split": "dev",
+  "sample_size": 20,
+  "date": "2026-04-15",
+  "notes": "Full AgentFlow loop: Planner->Executor->Verifier->Generator"
+}

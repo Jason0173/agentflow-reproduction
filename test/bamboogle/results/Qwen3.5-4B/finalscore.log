@@ -1,0 +1,24 @@
+##################################################
+Task: bamboogle
+📊 Using SINGLE-STAGE scoring for BAMBOOGLE
+Arguments: Namespace(task_name='bamboogle', data_file='bamboogle/data/data.json', result_dir='bamboogle/results/Qwen3.5-4B', exp_name=None, output_file='final_scores_direct_output.json', log_dir=None, response_type='direct_output', max_workers=16)
+# task_name: bamboogle
+# data_file: bamboogle/data/data.json
+# result_dir: bamboogle/results/Qwen3.5-4B
+# exp_name: None
+# output_file: final_scores_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 16
+##################################################
+
+Local OpenAI engine gpt-4o initialized.
+
+Scoring results (single-stage):   0%|          | 0/125 [00:00<?, ?it/s]Scoring results (single-stage): 100%|██████████| 125/125 [00:00<00:00, 2058.41it/s]
+
+Accuracy: 54.4% (68/125)
+
+Results saved to bamboogle/results/Qwen3.5-4B/final_scores_direct_output.json
+Wrong PIDs: ['4', '7', '9', '10', '13', '17', '18', '20', '21', '22', '24', '28', '30', '31', '37', '40', '42', '44', '45', '46', '47', '49', '54', '56', '57', '58', '59', '60', '62', '63', '65', '66', '68', '73', '78', '79', '80', '83', '84', '85', '87', '88', '90', '92', '93', '94', '96', '98', '99', '100', '105', '107', '109', '116', '120', '121', '124']
+Wrong Indices: [4, 7, 9, 10, 13, 17, 18, 20, 21, 22, 24, 28, 30, 31, 37, 40, 42, 44, 45, 46, 47, 49, 54, 56, 57, 58, 59, 60, 62, 63, 65, 66, 68, 73, 78, 79, 80, 83, 84, 85, 87, 88, 90, 92, 93, 94, 96, 98, 99, 100, 105, 107, 109, 116, 120, 121, 124]
+Scores saved to bamboogle/results/Qwen3.5-4B/final_scores_direct_output.json
