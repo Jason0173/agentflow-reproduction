@@ -221,3 +221,12 @@ marimo/_lsp/
 __marimo__/
 deployment/
 results/qwen35-0.8b-merged/
+
+# --- agentflow-reproduction ---
+# The rules above ignore *.json and *.log; keep the benchmark results that
+# back the numbers in README.md.
+!test/*/results/*/final*.json
+!test/*/results/*/final*.log
+!test/text2sql/*.json
+!results/final_qwen35_lora/*.json
+.DS_Store
