@@ -1,5 +1,7 @@
 # AgentFlow Reproduction: Qwen3.5 Planners, Flow-GRPO LoRA and a Text-to-SQL Benchmark
 
+[![tests](https://github.com/Jason0173/agentflow-reproduction/actions/workflows/tests.yml/badge.svg)](https://github.com/Jason0173/agentflow-reproduction/actions/workflows/tests.yml)
+
 This was a four-person team project for INFO 7375 Self-Improving AI at Northeastern University (Spring 2026). We reproduced **AgentFlow** ([paper](https://arxiv.org/abs/2510.05592), [code](https://github.com/lupantech/AgentFlow)), an agentic framework whose planner is trained inside the agent loop with Flow-GRPO. We ran it with Qwen3.5 models on five of the paper's benchmarks, trained the 0.8B planner with Flow-GRPO and LoRA, and added Spider Text-to-SQL as a benchmark the paper did not use.
 
 This repository is my (Ke Wang's) organized copy of the team's final code and results. The original is our team repo, [Melody-coder923/neu-self-improve-ai](https://github.com/Melody-coder923/neu-self-improve-ai) (`week08_group_work_finalVersion/`). [Who did what](#who-did-what) credits each part to the person who wrote it.
