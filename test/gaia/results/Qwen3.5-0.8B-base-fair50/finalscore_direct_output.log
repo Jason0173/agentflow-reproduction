@@ -1,0 +1,44 @@
+##################################################
+Task: gaia
+📊 Using SINGLE-STAGE scoring for GAIA
+Arguments: Namespace(task_name='gaia', data_file='gaia/data/data.json', result_dir='gaia/results/Qwen3.5-0.8B-base-fair50', exp_name=None, output_file='finalresults_direct_output.json', log_dir=None, response_type='direct_output', max_workers=2, judge_prompt='open_qa')
+# task_name: gaia
+# data_file: gaia/data/data.json
+# result_dir: gaia/results/Qwen3.5-0.8B-base-fair50
+# exp_name: None
+# output_file: finalresults_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 2
+# judge_prompt: open_qa
+##################################################
+
+Local OpenAI engine gpt-4o initialized (judge prompt: open_qa).
+
+
+Accuracy: 20.0% (10/50)
+
+Results saved to gaia/results/Qwen3.5-0.8B-base-fair50/finalresults_direct_output.json
+Wrong PIDs: ['0', '1', '2', '3', '4', '5', '7', '8', '9', '10', '12', '13', '15', '16', '17', '19', '21', '22', '24', '25', '26', '27', '28', '29', '31', '33', '34', '35', '37', '38', '39', '41', '42', '43', '44', '45', '46', '47', '48', '49']
+Wrong Indices: [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 15, 16, 17, 19, 21, 22, 24, 25, 26, 27, 28, 29, 31, 33, 34, 35, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+Log dir: gaia/logs/Qwen3.5-0.8B-base-fair50
+
+Step stats:
+- average_time: 	189.0
+- average_step: 	6.06
+- one_step_rate: 	0.2
+
+Tool usage:
+- Ground_Google_Search_Tool: 	0.304
+- No matched tool given: `Ground_Google_Search_Tool`: 	0.188
+- No matched tool given: `Web_RAG_Search_Tool`: 	0.122
+- No matched tool given: `Wikipedia_RAG_Search_Tool`: 	0.116
+- Wikipedia_RAG_Search_Tool: 	0.109
+- Web_RAG_Search_Tool: 	0.076
+- No matched tool given: `Generalist_Solution_Generator_Tool`: 	0.036
+- Generalist_Solution_Generator_Tool: 	0.02
+- None: 	0.013
+- No matched tool given: - Ground_Google_Search_Tool: 	0.007
+- No matched tool given: - `Ground_Google_Search_Tool`: 	0.007
+- No matched tool given: None (No tool can perform this specific task).: 	0.003
+Scores saved to gaia/results/Qwen3.5-0.8B-base-fair50/final_scores_direct_output.json

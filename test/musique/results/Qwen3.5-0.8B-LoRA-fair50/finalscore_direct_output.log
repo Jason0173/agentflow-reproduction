@@ -1,0 +1,36 @@
+##################################################
+Task: musique
+📊 Using SINGLE-STAGE scoring for MUSIQUE
+Arguments: Namespace(task_name='musique', data_file='musique/data/data.json', result_dir='musique/results/Qwen3.5-0.8B-LoRA-fair50', exp_name=None, output_file='finalresults_direct_output.json', log_dir=None, response_type='direct_output', max_workers=2, judge_prompt='open_qa')
+# task_name: musique
+# data_file: musique/data/data.json
+# result_dir: musique/results/Qwen3.5-0.8B-LoRA-fair50
+# exp_name: None
+# output_file: finalresults_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 2
+# judge_prompt: open_qa
+##################################################
+
+Local OpenAI engine gpt-4o initialized (judge prompt: open_qa).
+
+
+Accuracy: 10.0% (5/50)
+
+Results saved to musique/results/Qwen3.5-0.8B-LoRA-fair50/finalresults_direct_output.json
+Wrong PIDs: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '10', '11', '12', '13', '14', '15', '16', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '37', '38', '39', '40', '42', '43', '44', '45', '46', '48', '49']
+Wrong Indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 42, 43, 44, 45, 46, 48, 49]
+Log dir: musique/logs/Qwen3.5-0.8B-LoRA-fair50
+
+Step stats:
+- average_time: 	24.4
+- average_step: 	1.0
+- one_step_rate: 	1.0
+
+Tool usage:
+- Wikipedia_RAG_Search_Tool: 	0.62
+- Ground_Google_Search_Tool: 	0.22
+- Web_RAG_Search_Tool: 	0.14
+- No matched tool given: `Wikipedia_RAG_Search_Tool`: 	0.02
+Scores saved to musique/results/Qwen3.5-0.8B-LoRA-fair50/final_scores_direct_output.json

@@ -366,72 +366,6 @@ def _print_preflight(report: dict) -> None:
         print(report["error"])
 
 
-def _write_summary(run: str, limit: int, tasks: list, models: list) -> None:
-    verdicts, infra, wall, per_question = {}, {}, 0.0, []
-    for m in models:
-        for t in tasks:
-            folder = REPO / "test" / t / "results" / core.label(m, run)
-            fr = folder / "finalresults_direct_output.json"
-            if fr.exists():
-                verdicts[(m, t)] = core.load_verdicts(fr)
-            qc = folder / "questions.csv"
-            if qc.exists():
-                rows = list(csv.DictReader(qc.open()))
-                infra[(m, t)] = sum(1 for r in rows if r["final_errors"])
-                wall += sum(float(r["total_wall_s"] or 0) for r in rows)
-                per_question += [float(r["wall_s"]) for r in rows if r["wall_s"]]
-    table, csv_text = core.summarize(verdicts, infra, limit)
-    report_file = HERE / "runs" / run / "REPORT.json"
-    report = json.loads(report_file.read_text()) if report_file.exists() else {}
-    preflight_file = HERE / "runs" / run / "PREFLIGHT.json"
-    pre = json.loads(preflight_file.read_text()) if preflight_file.exists() else {}
-    tok = pre.get("checks", {}).get("adapter_tokenizer", {})
-    infra_total = sum(infra.values())
-    lines = [
-        f"# Base vs Flow-GRPO LoRA, same questions (run `{run}`)",
-        "",
-        f"Qwen3.5-0.8B as the AgentFlow planner, first {limit} questions of each benchmark. "
-        "Both models ran with the client settings of `test/run_lora_bench.sh`, the same server code "
-        "(`serve_lora_local.py`, bf16, greedy decoding, thinking off), the same tools and the same judge.",
-        "",
-        table,
-        "",
-        "*Change* is LoRA minus base in percentage points. *LoRA-only correct* and *Base-only correct* count "
-        "questions only one of the two models got right; the McNemar p-value tests whether that split could be chance.",
-        "",
-        "## Setup",
-        "",
-        f"- Base weights: `{core.BASE_MODEL_ID}` at revision `{report.get('base_revision', '?')}`; "
-        f"LoRA: `{core.LORA_DIR}` merged into the same weights in float32; both served in bf16 from "
-        "checkpoints written by `eval/build_models.py`.",
-        "- Tokenizer: the base model's, for both. The tokenizer saved with the adapter: "
-        f"{'renders the same prompts' if tok.get('ok') else tok.get('detail', 'not checked')}.",
-        f"- Questions: upstream AgentFlow `{core.UPSTREAM_COMMIT[:7]}`, SHA-256 checked.",
-        f"- Tools: Base_Generator (gpt-4o-mini), Google Search (`{report.get('search_model', '?')}` with Google "
-        "Search grounding), Wikipedia search (OpenAI embeddings + gpt-4o-mini). Judge: gpt-4o via "
-        "`test/calculate_score_unified.py`.",
-        f"- Hardware: {', '.join(report.get('gpus', [])) or '?'} on Modal; "
-        f"{report.get('started', '?')} to {report.get('finished', '?')}.",
-        f"- Questions still affected by an API or server error after {core.MAX_ATTEMPTS} attempts: {infra_total}.",
-        f"- Planner time: {wall / 3600:.1f} GPU-hours in total (about ${core.cost_estimate(wall):.2f} on Modal, "
-        "excluding start-up).",
-    ]
-    if per_question and run != "fair50":
-        avg = sum(per_question) / len(per_question)
-        full = 50 * len(core.TASKS) * len(core.MODELS) * avg
-        lines.append(f"- Average {avg:.0f} s per question. At that pace the full run (500 questions) needs about "
-                     f"{full / 3600:.0f} GPU-hours, roughly ${core.cost_estimate(full):.0f} on Modal.")
-    if report.get("unfinished"):
-        lines.append(f"- Unfinished: {report['unfinished']}")
-    text = "\n".join(lines) + "\n"
-    out_dir = HERE if run == "fair50" else HERE / "runs" / run
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "RESULTS.md").write_text(text)
-    (out_dir / "results.csv").write_text(csv_text)
-    print("\n" + text)
-    print(f"Written: {(out_dir / 'RESULTS.md').relative_to(REPO)}")
-
-
 def _code_version() -> str:
     try:
         head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True,
@@ -495,4 +429,8 @@ def main(run: str = "fair50", limit: int = 50, tasks: str = ",".join(core.TASKS)
                 dest.write_bytes(data)
                 written += 1
     print(f"Downloaded {written} files into the repository.")
-    _write_summary(run, limit, task_list, model_list)
+    import summarize
+
+    text = summarize.write_summary(run, limit, task_list, model_list, repo=REPO)
+    out = "eval/RESULTS.md" if run == "fair50" else f"eval/runs/{run}/RESULTS.md"
+    print("\n" + text + f"\nWritten: {out}")

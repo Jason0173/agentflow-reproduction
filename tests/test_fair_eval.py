@@ -308,3 +308,34 @@ def test_scorer_offers_the_open_qa_prompt():
     source = (ROOT / "test" / "calculate_score_unified.py").read_text()
     assert '"--judge_prompt"' in source and "OPEN_QA_VERIFICATION_PROMPT" in source
     assert 'default="upstream"' in source  # the team's default behaviour is unchanged
+
+
+# --- summary ------------------------------------------------------------------------------------
+
+def test_summary_from_committed_files(tmp_path):
+    import csv as _csv
+    import gzip
+
+    import summarize
+
+    # two questions per model: base takes 3 steps with one unusable tool name; LoRA answers in one step
+    for model, verdict, steps in (("base", [True, False], 3), ("lora", [True, True], 1)):
+        folder = tmp_path / "test" / "hotpotqa" / "results" / core.label(model, "unittest")
+        folder.mkdir(parents=True)
+        (folder / "finalresults_direct_output.json").write_text(
+            json.dumps({str(i): {"true_false": v} for i, v in enumerate(verdict)}))
+        memory = {f"Action Step {k + 1}": {"tool_name": "No matched tool given: `X`" if k == 0 and steps > 1
+                                           else "Ground_Google_Search_Tool"} for k in range(steps)}
+        with gzip.open(folder / "trajectories.jsonl.gz", "wt") as f:
+            for i in range(2):
+                f.write(json.dumps({"pid": str(i), "step_count": steps, "memory": memory}) + "\n")
+        with open(folder / "questions.csv", "w", newline="") as f:
+            w = _csv.DictWriter(f, fieldnames=["index", "attempts", "accepted", "final_errors", "wall_s", "total_wall_s"])
+            w.writeheader()
+            for i in range(2):
+                w.writerow({"index": i, "attempts": 1, "accepted": True, "final_errors": "", "wall_s": 10 * steps,
+                            "total_wall_s": 10 * steps})
+    text = summarize.write_summary("unittest", 2, ["hotpotqa"], repo=tmp_path)
+    assert "| hotpotqa | 2 | 50.0 | 100.0 | +50.0 | 1 | 0 | 1.00 |" in text
+    assert "| hotpotqa | 3.0 / 1.0 | 0% / 100% | 33% / 0% | 30 / 10 |" in text
+    assert (tmp_path / "eval" / "runs" / "unittest" / "RESULTS.md").exists()

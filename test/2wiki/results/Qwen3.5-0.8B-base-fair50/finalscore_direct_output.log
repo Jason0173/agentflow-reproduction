@@ -1,0 +1,45 @@
+##################################################
+Task: 2wiki
+📊 Using SINGLE-STAGE scoring for 2WIKI
+Arguments: Namespace(task_name='2wiki', data_file='2wiki/data/data.json', result_dir='2wiki/results/Qwen3.5-0.8B-base-fair50', exp_name=None, output_file='finalresults_direct_output.json', log_dir=None, response_type='direct_output', max_workers=2, judge_prompt='open_qa')
+# task_name: 2wiki
+# data_file: 2wiki/data/data.json
+# result_dir: 2wiki/results/Qwen3.5-0.8B-base-fair50
+# exp_name: None
+# output_file: finalresults_direct_output.json
+# log_dir: None
+# response_type: direct_output
+# max_workers: 2
+# judge_prompt: open_qa
+##################################################
+
+Local OpenAI engine gpt-4o initialized (judge prompt: open_qa).
+
+
+Accuracy: 30.0% (15/50)
+
+Results saved to 2wiki/results/Qwen3.5-0.8B-base-fair50/finalresults_direct_output.json
+Wrong PIDs: ['1', '3', '4', '5', '6', '7', '8', '10', '11', '12', '13', '14', '15', '16', '18', '19', '20', '23', '25', '26', '27', '28', '29', '30', '31', '32', '35', '36', '39', '40', '43', '45', '46', '48', '49']
+Wrong Indices: [1, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 23, 25, 26, 27, 28, 29, 30, 31, 32, 35, 36, 39, 40, 43, 45, 46, 48, 49]
+Log dir: 2wiki/logs/Qwen3.5-0.8B-base-fair50
+
+Step stats:
+- average_time: 	120.0
+- average_step: 	6.92
+- one_step_rate: 	0.2
+
+Tool usage:
+- Wikipedia_RAG_Search_Tool: 	0.275
+- No matched tool given: `Ground_Google_Search_Tool`: 	0.254
+- No matched tool given: `Wikipedia_RAG_Search_Tool`: 	0.165
+- Ground_Google_Search_Tool: 	0.133
+- No matched tool given: `Generalist_Solution_Generator_Tool`: 	0.075
+- Generalist_Solution_Generator_Tool: 	0.032
+- No matched tool given: - `Ground_Google_Search_Tool`: 	0.023
+- No matched tool given: - Ground_Google_Search_Tool: 	0.014
+- No matched tool given: - `Wikipedia_RAG_Search_Tool`: 	0.012
+- No matched tool given: `Web_RAG_Search_Tool`: 	0.006
+- Web_RAG_Search_Tool: 	0.006
+- No matched tool given: - Generalist_Solution_Generator_Tool: 	0.003
+- No matched tool given: - Wikipedia_RAG_Search_Tool: 	0.003
+Scores saved to 2wiki/results/Qwen3.5-0.8B-base-fair50/final_scores_direct_output.json
