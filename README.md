@@ -24,6 +24,13 @@ Building it also surfaced three problems that would have skewed any comparison:
 
 **Result:** no accuracy gain (23.6% vs 23.2%, McNemar p = 1.00). What training did change is the planner's behaviour: the trained model answers after about one step instead of five, and takes a fifth of the time per question. See [Results](#with-flow-grpo--lora-qwen35-08b-planner).
 
+**Fixes sent upstream.** I opened pull requests to AgentFlow for the problems the re-evaluation turned up:
+
+- [#41](https://github.com/lupantech/AgentFlow/pull/41): the Wikipedia tool never reads pages, because `model_string` is not stored.
+- [#42](https://github.com/lupantech/AgentFlow/pull/42): the planner rejects tool names wrapped in Markdown. This wasted 49% of the 0.8B planner's tool choices.
+- [#43](https://github.com/lupantech/AgentFlow/pull/43): an open-QA judge prompt, as an alternative to the multiple-choice one.
+- [#44](https://github.com/lupantech/AgentFlow/pull/44): a Wikimedia-compliant User-Agent for the Wikipedia tools.
+
 **Spider Text-to-SQL benchmark (new-benchmark requirement).** I added Spider 1.0 as the project's new benchmark. The evaluation puts the database schema in the prompt, runs the full AgentFlow loop, extracts the SQL from the final answer, and scores execution accuracy against the gold query. With Qwen3.5-0.8B as the planner, it got **0.50 (10/20)**, compared with **0.35 (7/20)** for an earlier Qwen2.5-7B-Instruct reference run. Details and caveats: [`test/text2sql/`](test/text2sql/).
 
 **First attempt at the training step.** Before the team moved training to Modal, I tried to run AgentFlow's own Flow-GRPO training stack (verl, vLLM and LoRA) locally on WSL2 with an RTX 4080 SUPER (16 GB). I got stuck in a chain of version conflicts between flash-attn, transformers, tokenizers, vLLM and CUDA inside the project environment. The team then trained on Modal with TRL's `GRPOTrainer` and PEFT LoRA instead, which is the run reported below. The lesson I took away: when a research stack's pinned dependencies fight your hardware, a smaller, well-supported training library on rented GPUs can be the faster path to a result.
