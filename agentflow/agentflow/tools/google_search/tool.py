@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import requests
 from dotenv import load_dotenv
 load_dotenv()
@@ -61,7 +62,9 @@ class Google_Search_Tool(BaseTool):
             }
         )
         self.max_retries = 5
-        self.search_model = model_string
+        # GOOGLE_SEARCH_MODEL overrides the default search model, e.g. for API
+        # projects that no longer have access to gemini-2.5-flash.
+        self.search_model = os.getenv("GOOGLE_SEARCH_MODEL") or model_string
 
         try:
             api_key = os.getenv("GOOGLE_API_KEY")
@@ -189,7 +192,9 @@ class Google_Search_Tool(BaseTool):
                 if attempt == self.max_retries - 1:  # Last attempt
                     print(f"Google Search failed after {self.max_retries} attempts. Last error: {str(e)}")
                     return f"Google Search tried {self.max_retries} times but failed. Last error: {str(e)}"
-                # Continue to next attempt
+                # Back off before the next attempt (1, 2, 4, 8 s) so a burst of
+                # rate-limit errors does not use up all retries at once.
+                time.sleep(2 ** attempt)
 
         # Check if we have a valid response before proceeding
         if response is None or response_text is None:
