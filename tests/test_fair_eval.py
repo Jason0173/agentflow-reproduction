@@ -61,7 +61,9 @@ def test_score_command_matches_run_lora_bench():
     ours = as_flags(core.score_command("gaia", "gaia/data/data.json", "gaia/results/x"))
     theirs = script_call("calculate_score_unified.py")
     assert set(theirs) <= set(ours)
-    assert set(ours) - set(theirs) == {"--max_workers"}  # only how many judge calls run at once
+    # only how many judge calls run at once, and the open-QA judge prompt
+    assert set(ours) - set(theirs) == {"--max_workers", "--judge_prompt"}
+    assert ours["--judge_prompt"] == "open_qa"
     for flag in ("--response_type", "--output_file"):
         assert ours[flag] == theirs[flag]
 
@@ -300,3 +302,9 @@ def test_run_names_are_validated():
 def test_summary_shows_benchmarks_that_did_not_finish():
     table, _ = core.summarize({("base", "gaia"): {"0": True}}, {}, limit=1)
     assert "| gaia | LoRA not finished |" in table
+
+
+def test_scorer_offers_the_open_qa_prompt():
+    source = (ROOT / "test" / "calculate_score_unified.py").read_text()
+    assert '"--judge_prompt"' in source and "OPEN_QA_VERIFICATION_PROMPT" in source
+    assert 'default="upstream"' in source  # the team's default behaviour is unchanged

@@ -105,6 +105,7 @@ pytest tests                                     # unit tests, no GPU or API key
 - **Package folder name.** The team repo stored the framework in `AgentFlow/`, but `setup.sh`, `pyproject.toml` and all imports expect `agentflow/`. This only works on case-insensitive file systems such as macOS. Here it is `agentflow/` again, as upstream.
 - **Spider script.** The script that produced the Spider numbers had hard-coded paths. It is now `test/text2sql/spider_eval.py` with command-line options, and the evaluation logic is unchanged. An unfinished duplicate script and an unused `execute_sql_tool.py` with a syntax error were removed.
 - **Google Search tool.** The search model can be set with `GOOGLE_SEARCH_MODEL`, and retries now wait 1, 2, 4 and 8 seconds instead of firing five times within a second.
+- **Judge prompt.** `test/calculate_score_unified.py` has a new `--judge_prompt open_qa` option. The default prompt, kept as it was, is worded for multiple-choice questions; with it, gpt-4o judged a correct free-form answer wrong in our tests. The re-evaluation in [`eval/`](eval/) uses the new option.
 - **Wikipedia tools.** Requests to Wikipedia now send a User-Agent that identifies this project, as [Wikimedia's policy](https://meta.wikimedia.org/wiki/User-Agent_policy) asks. The generic default was being refused.
 - **Trimmed.** The ~2,200 per-question trajectory files (about 440 MB), the upstream README images and the `.DS_Store` files were not copied. The trajectory files remain in the team repo.
 

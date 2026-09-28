@@ -19,7 +19,7 @@ The comparison in the team report differs in more than the training:
 | Serving | `serve_lora_local.py` with a merged checkpoint (`MERGED_MODEL`) and the base model's tokenizer, bf16, greedy decoding, thinking off, 2,048 new tokens |
 | Weights | One snapshot of `Qwen/Qwen3.5-0.8B`, baked into the image with its revision recorded. `build_models.py` writes both served checkpoints with the same code, merging `results/final_qwen35_lora` into the second one in float32. The preflight checks that the two differ only in the matrices the adapter targets |
 | Tools | Base_Generator (gpt-4o-mini), Google Search with grounding, Wikipedia search |
-| Judge | gpt-4o through `test/calculate_score_unified.py`. Its prompt is upstream AgentFlow's and is worded for multiple-choice questions, so compare accuracies within this run rather than with other papers |
+| Judge | gpt-4o through `test/calculate_score_unified.py`, with its open-QA prompt (`--judge_prompt open_qa`, see below) |
 | Hardware | NVIDIA L4 on Modal |
 
 Base and LoRA work on the same questions at the same time (the scheduler interleaves them), so a temporary API problem affects both alike.
@@ -29,6 +29,7 @@ Base and LoRA work on the same questions at the same time (the scheduler interle
 - **Search model.** Google Search uses `gemini-3.5-flash-lite` instead of `gemini-2.5-flash`, because new Gemini API projects may not get access to the 2.5 models. It can be set with `--search-model`.
 - **Merged checkpoint.** The team served its published merged model (`Skypioneer/qwen35-0.8b-agentflow-lora`). Here the merge is rebuilt from the committed adapter on the same base snapshot, so nothing but the LoRA update differs. (The server's own adapter mode does not work with the pinned torch 2.6 and peft 0.19.)
 - **Retry backoff.** The search tool now waits 1, 2, 4 and 8 seconds between retries. Before, a burst of rate-limit errors used up all five retries within a second.
+- **Judge prompt.** The scorer's default single-stage prompt, unchanged since upstream AgentFlow's first commit, is written for multiple-choice questions: a prediction counts only if it matches "the correct choice letter". All five benchmarks here are free-form. In the preflight, gpt-4o therefore judged `<answer>Paris</answer>` against the answer "Paris" as wrong because "Paris" is not a letter. The evaluation uses a new `--judge_prompt open_qa` option instead, which asks whether the two answers name the same thing. The default is unchanged, so absolute accuracies here are not comparable with the team's table.
 - **Wikipedia user agent.** The Wikipedia tools now identify the project in their User-Agent, as [Wikimedia's policy](https://meta.wikimedia.org/wiki/User-Agent_policy) asks. With the generic default, Wikipedia returned no search results from Modal.
 
 ## API failures

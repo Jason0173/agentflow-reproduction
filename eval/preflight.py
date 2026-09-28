@@ -120,16 +120,21 @@ def _wikipedia():
 
 @check("judge_gpt4o")
 def _judge():
-    """The judge answers through the same code as the benchmark scoring. The agent
-    puts its final answer in <answer> tags, which the scorer extracts first."""
+    """The judge answers through the same code and prompt as the benchmark scoring.
+    The agent puts its final answer in <answer> tags, which the scorer extracts first."""
     from calculate_score_unified import ResultScorer
 
-    q = "What is the capital of France?"
-    why_right, right = ResultScorer().answer_verification(q, "It is Paris. <answer>Paris</answer>", "Paris")
-    why_wrong, wrong = ResultScorer().answer_verification(q, "It is Lyon. <answer>Lyon</answer>", "Paris")
-    assert right is True and wrong is False, (
-        f"judge verdicts {right}, {wrong} (expected True, False). Its reasons: {why_right!r} / {why_wrong!r}")
-    return "ok"
+    scorer = ResultScorer(judge_prompt="open_qa")
+    cases = [  # (question, response, correct answer, expected verdict)
+        ("What is the capital of France?", "It is Paris. <answer>Paris</answer>", "Paris", True),
+        ("What is the capital of France?", "It is Lyon. <answer>Lyon</answer>", "Paris", False),
+        ("What rocket launched Voyager 2?", "<answer>A Titan IIIE/Centaur rocket</answer>", "['Titan IIIE']", True),
+        ("Who was US president in 1812?", "<answer>Thomas Jefferson</answer>", "['james madison']", False),
+    ]
+    for question, response, gold, expected in cases:
+        why, verdict = scorer.answer_verification(question, response, gold)
+        assert verdict is expected, f"judge said {verdict} for {response!r} vs {gold!r}: {why!r}"
+    return f"open-QA judge prompt: {len(cases)} of {len(cases)} test verdicts as expected"
 
 
 @check("lora_applies")

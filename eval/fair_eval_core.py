@@ -104,8 +104,10 @@ def solve_command(task: str, index: int, data_file: str, cache_dir: str, out_dir
 
 
 def score_command(task: str, data_file: str, result_dir: str, max_workers: int = 4) -> List[str]:
-    """The scoring call made by run_lora_bench.sh (fewer parallel judge calls,
-    which only changes how fast the judge runs, not its verdicts)."""
+    """The scoring call made by run_lora_bench.sh, with two additions: fewer
+    parallel judge calls (speed only), and the open-QA judge prompt, because the
+    default prompt is worded for multiple-choice questions and gpt-4o marks
+    correct free-form answers wrong with it (see eval/README.md)."""
     return [
         "python", "calculate_score_unified.py",
         "--task_name", task,
@@ -114,6 +116,7 @@ def score_command(task: str, data_file: str, result_dir: str, max_workers: int =
         "--response_type", "direct_output",
         "--output_file", "finalresults_direct_output.json",
         "--max_workers", str(max_workers),
+        "--judge_prompt", "open_qa",
     ]
 
 
