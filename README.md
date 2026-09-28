@@ -39,7 +39,15 @@ Each score comes from `test/<benchmark>/results/<model>/final_scores_direct_outp
 | GAIA | 0.0 | 6.0 | +6.0 |
 | Musique | 3.0 | 6.0 | +3.0 |
 
-The LoRA adapter is in `results/final_qwen35_lora/`, and the merged model is published as [`Skypioneer/qwen35-0.8b-agentflow-lora`](https://huggingface.co/Skypioneer/qwen35-0.8b-agentflow-lora). The trained model was evaluated on the first 50 questions of each benchmark, while the no-training scores use the full sets above. So the comparison is indicative rather than exact. These scores come from the team report ([`docs/team_report.md`](docs/team_report.md)); the per-question LoRA outputs were not committed to the team repo.
+The LoRA adapter is in `results/final_qwen35_lora/`, and the merged model is published as [`Skypioneer/qwen35-0.8b-agentflow-lora`](https://huggingface.co/Skypioneer/qwen35-0.8b-agentflow-lora). These scores come from the team report ([`docs/team_report.md`](docs/team_report.md)).
+
+**This comparison is not controlled.** Besides the training, the two columns differ in three ways:
+
+- **Questions.** The trained model answered the first 50 questions of each benchmark; the no-training scores use the full sets. On those first 50 questions alone, the committed no-training results are 6.0 (Bamboogle), 16.0 (2Wiki), 8.0 (HotpotQA), 0.0 (Musique) and 0.0 (GAIA).
+- **Search failures.** In the no-training runs, 25–39% of the final answers on 2Wiki, HotpotQA, Musique and GAIA say that Google Search failed with a quota error. The trained run's per-question outputs were not committed, so they cannot be checked the same way.
+- **Serving.** The two models were served by different code on different hardware.
+
+[`eval/`](eval/) re-runs both models on the same questions with the same serving code, tools and judge, and retries questions that hit API errors.
 
 ### New benchmark: Spider Text-to-SQL
 
@@ -58,7 +66,7 @@ This is based on the commit history of the team repo.
 | Project setup, Modal model engine, no-training runs for 0.8B/2B/4B, GAIA LLM judging, Flow-GRPO + LoRA training on Modal | Chien-Cheng Wang | `agentflow/agentflow/engine/modal_engine.py`, `modal_serve.py`, `test/score_gaia_llm.py`, `train/modal_train_agent.py`, `results/final_qwen35_lora/` |
 | Qwen3.5-9B/27B runs on Modal vLLM | Zhenyu Dai | `test/run_step3.sh`, `test/*/run_modal_*.sh` |
 | Serving and evaluating the LoRA model on an H200 (Northeastern Explorer cluster), final report | Yan Zhao | `serve_lora_local.py`, `run_lora_h200.sbatch`, `smoke_test_lora.py`, `cluster_check.sh`, `test/run_lora_bench.sh`, `docs/team_report.md` |
-| Spider Text-to-SQL benchmark; local Flow-GRPO training attempt | Ke Wang | `test/text2sql/`, `tests/` |
+| Spider Text-to-SQL benchmark; local Flow-GRPO training attempt; controlled base-vs-LoRA re-evaluation | Ke Wang | `test/text2sql/`, `eval/`, `tests/` |
 
 ## Repository layout
 
@@ -71,8 +79,9 @@ train/                Flow-GRPO training: modal_train_agent.py (TRL + LoRA) and 
 results/              trained LoRA adapter for Qwen3.5-0.8B
 serve_lora_local.py   serve the LoRA model with an OpenAI-compatible API (used on the H200)
 modal_serve.py        serve a model on Modal
+eval/                 controlled base-vs-LoRA re-evaluation on Modal
 docs/                 the team's submitted report and the upstream how-to guides
-tests/                unit tests (Spider scoring)
+tests/                unit tests (Spider scoring, evaluation runner)
 ```
 
 ## Running
@@ -87,6 +96,7 @@ python quick_start.py                            # one question end to end
 cd test/bamboogle && bash run.sh                 # one benchmark, no training
 modal run train/modal_train_agent.py             # Flow-GRPO + LoRA training on Modal
 python test/text2sql/spider_eval.py --limit 20   # Spider (see test/text2sql/README.md)
+modal run --detach eval/modal_fair_eval.py       # base vs LoRA on the same questions (see eval/README.md)
 pytest tests                                     # unit tests, no GPU or API key
 ```
 
@@ -94,6 +104,7 @@ pytest tests                                     # unit tests, no GPU or API key
 
 - **Package folder name.** The team repo stored the framework in `AgentFlow/`, but `setup.sh`, `pyproject.toml` and all imports expect `agentflow/`. This only works on case-insensitive file systems such as macOS. Here it is `agentflow/` again, as upstream.
 - **Spider script.** The script that produced the Spider numbers had hard-coded paths. It is now `test/text2sql/spider_eval.py` with command-line options, and the evaluation logic is unchanged. An unfinished duplicate script and an unused `execute_sql_tool.py` with a syntax error were removed.
+- **Google Search tool.** The search model can be set with `GOOGLE_SEARCH_MODEL`, and retries now wait 1, 2, 4 and 8 seconds instead of firing five times within a second.
 - **Trimmed.** The ~2,200 per-question trajectory files (about 440 MB), the upstream README images and the `.DS_Store` files were not copied. The trajectory files remain in the team repo.
 
 ## Citation and license

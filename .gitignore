@@ -230,3 +230,11 @@ results/qwen35-0.8b-merged/
 !test/text2sql/*.json
 !results/final_qwen35_lora/*.json
 .DS_Store
+
+# Fair base-vs-LoRA evaluation (eval/): keep scores, per-question tables and the
+# compressed trajectories of the main run; skip test runs, logs and local data copies
+eval/runs/
+test/*/logs/
+test/*/cache/
+test/*/data/
+test/*/results/*-smoke/
