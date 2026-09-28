@@ -8,6 +8,22 @@ This repository is my (Ke Wang's) organized copy of the team's final code and re
 
 ## My contribution
 
+**Controlled re-evaluation of the training result.** The team report credits Flow-GRPO + LoRA with large gains, up to +22 points on HotpotQA. That comparison was confounded:
+
+- the two models answered different sets of questions;
+- in the untrained runs, Google Search had run out of quota;
+- the two models were served by different code.
+
+I built [`eval/`](eval/), a Modal pipeline that runs both models on the same 250 questions. Everything except the LoRA weights is held fixed: base-weight snapshot, serving code, tools, judge and GPU. Questions that hit API errors are retried. Before any GPU time is spent, a preflight checks every tool and API key, and that the served LoRA weights really differ from the base.
+
+Building it also surfaced three problems that would have skewed any comparison:
+
+- the scorer's judge prompt is written for multiple-choice questions and marked correct free-form answers wrong;
+- Wikipedia rejected the tools' generic user agent;
+- the pinned torch/peft versions cannot load the adapter.
+
+**Result:** no accuracy gain (23.6% vs 23.2%, McNemar p = 1.00). What training did change is the planner's behaviour: the trained model answers after about one step instead of five, and takes a fifth of the time per question. See [Results](#with-flow-grpo--lora-qwen35-08b-planner).
+
 **Spider Text-to-SQL benchmark (new-benchmark requirement).** I added Spider 1.0 as the project's new benchmark. The evaluation puts the database schema in the prompt, runs the full AgentFlow loop, extracts the SQL from the final answer, and scores execution accuracy against the gold query. With Qwen3.5-0.8B as the planner, it got **0.50 (10/20)**, compared with **0.35 (7/20)** for an earlier Qwen2.5-7B-Instruct reference run. Details and caveats: [`test/text2sql/`](test/text2sql/).
 
 **First attempt at the training step.** Before the team moved training to Modal, I tried to run AgentFlow's own Flow-GRPO training stack (verl, vLLM and LoRA) locally on WSL2 with an RTX 4080 SUPER (16 GB). I got stuck in a chain of version conflicts between flash-attn, transformers, tokenizers, vLLM and CUDA inside the project environment. The team then trained on Modal with TRL's `GRPOTrainer` and PEFT LoRA instead, which is the run reported below. The lesson I took away: when a research stack's pinned dependencies fight your hardware, a smaller, well-supported training library on rented GPUs can be the faster path to a result.
@@ -29,25 +45,52 @@ Accuracy (%) of the full AgentFlow loop, with each Qwen3.5 model as the planner:
 
 Each score comes from `test/<benchmark>/results/<model>/final_scores_direct_output.json`. There were 96–127 questions per benchmark. GAIA answers for 0.8B–4B were judged by an LLM (`test/score_gaia_llm.py`).
 
+These are the team's runs, and two problems affect them. Scores from `test/calculate_score_unified.py` used its multiple-choice judge prompt, described below. And 25–39% of the 0.8B runs' answers report Google Search quota errors; the 9B runs show none, and the 2B and 4B per-question answers are not in the repo. In the controlled re-run below, the 0.8B planner scores 40.0 on the first 50 HotpotQA questions, where the committed run above has 8.0.
+
 ### With Flow-GRPO + LoRA (Qwen3.5-0.8B planner)
 
-| Benchmark | No training | Flow-GRPO + LoRA | Change |
+The team report found large gains from training. A controlled re-run on the same questions does not reproduce them:
+
+| Benchmark | Team report: no training → LoRA | Controlled re-run: no training → LoRA | McNemar p |
 |---|---:|---:|---:|
-| HotpotQA | 8.0 | 30.0 | **+22.0** |
-| 2Wiki | 15.0 | 28.0 | +13.0 |
-| Bamboogle | 10.4 | 18.0 | +7.6 |
-| GAIA | 0.0 | 6.0 | +6.0 |
-| Musique | 3.0 | 6.0 | +3.0 |
+| HotpotQA | 8.0 → 30.0 (+22.0) | 40.0 → 32.0 (−8.0) | 0.45 |
+| 2Wiki | 15.0 → 28.0 (+13.0) | 30.0 → 34.0 (+4.0) | 0.81 |
+| Bamboogle | 10.4 → 18.0 (+7.6) | 24.0 → 24.0 (0.0) | 1.00 |
+| GAIA | 0.0 → 6.0 (+6.0) | 20.0 → 16.0 (−4.0) | 0.77 |
+| Musique | 3.0 → 6.0 (+3.0) | 4.0 → 10.0 (+6.0) | 0.38 |
+| All five (250 questions) | | 23.6 → 23.2 (−0.4) | 1.00 |
 
-The LoRA adapter is in `results/final_qwen35_lora/`, and the merged model is published as [`Skypioneer/qwen35-0.8b-agentflow-lora`](https://huggingface.co/Skypioneer/qwen35-0.8b-agentflow-lora). These scores come from the team report ([`docs/team_report.md`](docs/team_report.md)).
+**Team report.** The trained model answered the first 50 questions of each benchmark; the no-training scores cover the full sets. The two columns also differ in two other ways:
 
-**This comparison is not controlled.** Besides the training, the two columns differ in three ways:
-
-- **Questions.** The trained model answered the first 50 questions of each benchmark; the no-training scores use the full sets. On those first 50 questions alone, the committed no-training results are 6.0 (Bamboogle), 16.0 (2Wiki), 8.0 (HotpotQA), 0.0 (Musique) and 0.0 (GAIA).
-- **Search failures.** In the no-training runs, 25–39% of the final answers on 2Wiki, HotpotQA, Musique and GAIA say that Google Search failed with a quota error. The trained run's per-question outputs were not committed, so they cannot be checked the same way.
+- **Search failures.** In the no-training runs, 25–39% of the final answers on 2Wiki, HotpotQA, Musique and GAIA say that Google Search failed with a quota error.
 - **Serving.** The two models were served by different code on different hardware.
 
-[`eval/`](eval/) re-runs both models on the same questions with the same serving code, tools and judge, and retries questions that hit API errors.
+**Controlled re-run** ([`eval/`](eval/)).
+
+- **Held fixed:**
+  - the first 50 questions of each benchmark;
+  - the agent settings of the team's LoRA run;
+  - one snapshot of the base weights, with the adapter merged in for the trained model;
+  - the same serving code, tools and gpt-4o judge.
+- **Retries:** questions that hit API errors are retried.
+- **Judge prompt:** the judge uses an open-QA prompt, because the scorer's default prompt is written for multiple-choice questions. Absolute scores are therefore not comparable across the two columns.
+- **Significance:** none of the per-benchmark differences is statistically significant. The two models agree on most questions, and each gets about 35 right that the other misses.
+
+![Accuracy and steps per question, base vs LoRA](eval/plots/fair50.png)
+
+What training did change is how the planner works. Averages over all 250 questions:
+
+| | No training | Flow-GRPO + LoRA |
+|---|---:|---:|
+| Steps per question | 5.5 | 1.1 |
+| Questions answered after one step | 30% | 98% |
+| Questions that ran to the 10-step limit | 38% | 1% |
+| Tool selections AgentFlow could not use | 49% | 9% |
+| Seconds per question (NVIDIA L4) | 185 | 39 |
+
+Half of the untrained model's tool choices are wasted: it wraps the tool name in backticks (96% of the failures), AgentFlow's parser rejects it, and the model often keeps planning until the step limit. The trained model usually names the tool plainly, searches once and answers. It reaches the same accuracy at about a fifth of the cost. Per-benchmark numbers, the per-question verdicts and every trajectory are in [`eval/RESULTS.md`](eval/RESULTS.md) and `test/<benchmark>/results/Qwen3.5-0.8B-{base,LoRA}-fair50/`.
+
+The LoRA adapter is in `results/final_qwen35_lora/`, and the team's merged model is published as [`Skypioneer/qwen35-0.8b-agentflow-lora`](https://huggingface.co/Skypioneer/qwen35-0.8b-agentflow-lora).
 
 ### New benchmark: Spider Text-to-SQL
 

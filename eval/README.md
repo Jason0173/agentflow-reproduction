@@ -2,6 +2,18 @@
 
 This folder re-runs the untrained Qwen3.5-0.8B planner and the Flow-GRPO + LoRA planner under identical conditions, so the difference between them can be attributed to the training.
 
+## Result
+
+Over the first 50 questions of each of the five benchmarks (250 in total), the two planners are equally accurate: 23.6% without training, 23.2% with Flow-GRPO + LoRA, McNemar p = 1.00. Training did change how the planner works. Averages over the 250 questions:
+
+| | No training | Flow-GRPO + LoRA |
+|---|---:|---:|
+| Steps per question | 5.5 | 1.1 |
+| Tool selections AgentFlow could not use | 49% | 9% |
+| Seconds per question | 185 | 39 |
+
+Full tables and the figure are in [`RESULTS.md`](RESULTS.md). `python eval/summarize.py` rebuilds them from the committed results.
+
 ## Why a re-run
 
 The comparison in the team report differs in more than the training:
@@ -32,6 +44,8 @@ Base and LoRA work on the same questions at the same time (the scheduler interle
 - **Judge prompt.** The scorer's default single-stage prompt, unchanged since upstream AgentFlow's first commit, is written for multiple-choice questions: a prediction counts only if it matches "the correct choice letter". All five benchmarks here are free-form. In the preflight, gpt-4o therefore judged `<answer>Paris</answer>` against the answer "Paris" as wrong because "Paris" is not a letter. The evaluation uses a new `--judge_prompt open_qa` option instead, which asks whether the two answers name the same thing. The default is unchanged, so absolute accuracies here are not comparable with the team's table.
 - **Wikipedia user agent.** The Wikipedia tools now identify the project in their User-Agent, as [Wikimedia's policy](https://meta.wikimedia.org/wiki/User-Agent_policy) asks. With the generic default, Wikipedia returned no search results from Modal.
 
+**Kept as in the team's setup, for both models:** the Wikipedia tool never reads page text. Upstream AgentFlow's `Wikipedia_Search_Tool` does not store its `model_string`, so creating its page reader fails (`Error creating Web RAG tool` in the logs), and the tool returns search titles only. Fixing it would change the tools the team's LoRA run used.
+
 ## API failures
 
 An answer should count as wrong because of the planner, not because an API ran out of quota. After each question, `fair_eval_core.infra_errors` scans the tool results and model calls for error strings, for example quota errors, failed searches, OpenAI error objects, timeouts and planner-server errors.
@@ -55,11 +69,11 @@ modal run --detach eval/modal_fair_eval.py           # full run: 2 models x 5 be
 modal run eval/modal_fair_eval.py --download-only    # fetch results, e.g. after the terminal closed
 ```
 
-Progress is stored in the Modal volume `agentflow-fair-eval`. Running the same command again continues where it stopped. A run keeps the settings it started with: resuming with a different `--limit` or `--search-model` is refused. The smoke run prints the average time per question and the projected cost of the full run.
+Progress is stored in the Modal volume `agentflow-fair-eval`. In the reported run, Modal preempted the coordinator container twice; each time it restarted, cancelled the chunks in flight and continued from the stored progress. Running the same command again continues where it stopped. A run keeps the settings it started with: resuming with a different `--limit` or `--search-model` is refused. The smoke run prints the average time per question and the projected cost of the full run.
 
 ## Output
 
-- **Summary.** `RESULTS.md` and `results.csv` (written by the run) hold per-benchmark accuracy for both models on the same questions, the questions only one model got right, and an exact McNemar test.
+- **Summary.** `RESULTS.md`, `results.csv` and `plots/fair50.png` (written by `summarize.py`) hold per-benchmark accuracy for both models on the same questions, the questions only one model got right, and an exact McNemar test.
 - **Per run folder.** Each `test/<benchmark>/results/Qwen3.5-0.8B-{base,LoRA}-fair50/` contains:
   - `final_scores_direct_output.json` and `finalresults_direct_output.json`: the scorer's output.
   - `questions.csv`: attempts, remaining API errors and time for each question.
@@ -73,4 +87,5 @@ Progress is stored in the Modal volume `agentflow-fair-eval`. Running the same c
 | `chunk_runner.py` | Runs `solve.py` for a list of questions against one server, detects API failures, scores |
 | `fair_eval_core.py` | Settings, error patterns, scheduling and statistics (unit-tested) |
 | `build_models.py` | Image build step: writes the base and base + LoRA checkpoints |
+| `summarize.py` | Builds `RESULTS.md`, `results.csv` and `plots/` from the committed results |
 | `preflight.py` | Checks data, tools, keys, judge, the two checkpoints and tokenizers before any GPU time |
