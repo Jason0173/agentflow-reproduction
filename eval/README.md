@@ -29,6 +29,7 @@ Base and LoRA work on the same questions at the same time (the scheduler interle
 - **Search model.** Google Search uses `gemini-3.5-flash-lite` instead of `gemini-2.5-flash`, because new Gemini API projects may not get access to the 2.5 models. It can be set with `--search-model`.
 - **Merged checkpoint.** The team served its published merged model (`Skypioneer/qwen35-0.8b-agentflow-lora`). Here the merge is rebuilt from the committed adapter on the same base snapshot, so nothing but the LoRA update differs. (The server's own adapter mode does not work with the pinned torch 2.6 and peft 0.19.)
 - **Retry backoff.** The search tool now waits 1, 2, 4 and 8 seconds between retries. Before, a burst of rate-limit errors used up all five retries within a second.
+- **Wikipedia user agent.** The Wikipedia tools now identify the project in their User-Agent, as [Wikimedia's policy](https://meta.wikimedia.org/wiki/User-Agent_policy) asks. With the generic default, Wikipedia returned no search results from Modal.
 
 ## API failures
 

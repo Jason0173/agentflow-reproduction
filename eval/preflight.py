@@ -92,20 +92,43 @@ def _generator():
     return "ok"
 
 
+def wikipedia_diagnosis():
+    """HTTP status and start of the body of one raw Wikipedia API call, with the
+    User-Agent the wikipedia package now sends, to explain a failure."""
+    import requests
+    import wikipedia
+
+    try:
+        r = requests.get("https://en.wikipedia.org/w/api.php",
+                         params={"action": "query", "list": "search", "srsearch": "Eiffel Tower", "format": "json"},
+                         headers={"User-Agent": wikipedia.wikipedia.USER_AGENT}, timeout=20)
+        return (f"raw API call: HTTP {r.status_code}, {r.headers.get('content-type')}, "
+                f"user agent {wikipedia.wikipedia.USER_AGENT!r}, body starts {r.text[:200]!r}")
+    except Exception as exc:  # noqa: BLE001
+        return f"raw API call failed: {exc}"
+
+
 @check("wikipedia_search")
 def _wikipedia():
-    result = run_tool("Wikipedia_RAG_Search_Tool", 'execution = tool.execute(query="Eiffel Tower height")')
-    assert "eiffel" in str(result).lower(), f"unexpected result: {str(result)[:500]}"
+    try:
+        result = run_tool("Wikipedia_RAG_Search_Tool", 'execution = tool.execute(query="Eiffel Tower height")')
+        assert "eiffel" in str(result).lower(), f"unexpected result: {str(result)[:500]}"
+    except AssertionError as exc:
+        raise AssertionError(f"{exc}\n    {wikipedia_diagnosis()}") from None
     return "ok"
 
 
 @check("judge_gpt4o")
 def _judge():
+    """The judge answers through the same code as the benchmark scoring. The agent
+    puts its final answer in <answer> tags, which the scorer extracts first."""
     from calculate_score_unified import ResultScorer
 
-    _, right = ResultScorer().answer_verification("What is the capital of France?", "The answer is Paris.", "Paris")
-    _, wrong = ResultScorer().answer_verification("What is the capital of France?", "The answer is Lyon.", "Paris")
-    assert right is True and wrong is False, f"judge verdicts {right}, {wrong}"
+    q = "What is the capital of France?"
+    why_right, right = ResultScorer().answer_verification(q, "It is Paris. <answer>Paris</answer>", "Paris")
+    why_wrong, wrong = ResultScorer().answer_verification(q, "It is Lyon. <answer>Lyon</answer>", "Paris")
+    assert right is True and wrong is False, (
+        f"judge verdicts {right}, {wrong} (expected True, False). Its reasons: {why_right!r} / {why_wrong!r}")
     return "ok"
 
 
